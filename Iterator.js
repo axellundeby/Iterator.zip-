@@ -989,7 +989,7 @@ function IteratorZip(iterables, options = {}) {
 
   //.5 If mode is not one of "shortest", "longest", or "strict", throw a TypeError exception.
   if ("shortest" !== mode && "longest" !== mode && "strict" !== mode) {
-    return "mode not valid"
+    throw new TypeError('Not valid type');
   }
 
   //6. Let paddingOption be undefined.
@@ -1084,7 +1084,8 @@ function IteratorZip(iterables, options = {}) {
       //If usingIterator is true, then
       if (usingIterator) {
         //1. Let completion be Completion(IteratorClose(paddingIter, NormalCompletion(unused))).
-        var completion = IteratorClose(paddingIter, NormalCompletion(undefined));
+        IteratorClose(paddingIter);
+        var completion = NormalCompletion(undefined);
         //2. IfAbruptCloseIterators(completion, iters).
         IfAbruptCloseIterators(completion, iters);
       }
@@ -1144,15 +1145,15 @@ function zipping(iters, mode, padding, finishResults) {
           return IteratorCloseAll(openIters, ThrowCompletion(e));
         }
 
-        // 3.b.iii.3.d: If result is DONE, then
+        //d. If result is done, then
         if (result.done) {
 
-          // 3.b.iii.3.d.i: Remove iter from openIters.
+          //i: Remove iter from openIters.
           openIters[i] = null;
 
-          // 3.b.iii.3.d.ii: If mode is "shortest", then
+          //ii: If mode is "shortest", then
           if (mode === "shortest") {
-            // 3.b.iii.3.d.ii.i: Return ? IteratorCloseAll(openIters, ReturnCompletion(undefined))
+           //i: Return ? IteratorCloseAll(openIters, ReturnCompletion(undefined))
             return IteratorCloseAll(
               openIters,
               CreateIteratorResultObject(undefined, true)
@@ -1297,9 +1298,11 @@ function CreateIteratorResultObject(value, done) {
 }
 
 
-const zip1 = Iterator.zip([[1, 2, 3], ['a', 'b']], { mode: 'shortest' });
+// const zip1 = Iterator.zip([[1, 2, 3], ['a', 'b']], { mode: 'shortest' });
 
-const zip2 = Iterator.zip([[1, 2, 3], ['a', 'b'],["jump", "run"]], { mode: 'longest', padding: ["meow"] });
+// Iterator.zip([[1, 2, 3], [undefined, undefined]], { mode: 'shortest' });
+
+// const zip2 = Iterator.zip([[1, 2, 3], ['a', 'b'],["jump", "run"]], { mode: 'longest', padding: ["meow"] });
 
 
 //const zipKeyed1 = Iterator.zipKeyed({num:[1,2,3], let:['a','b']}, {mode:'longest', padding:{num: 1, let: 1}});
@@ -1311,10 +1314,10 @@ const zip2 = Iterator.zip([[1, 2, 3], ['a', 'b'],["jump", "run"]], { mode: 'long
 //     print(zp1);
 //   }
   
-  const zipIt2 = Iterator.zip([[1, 2], ["a", "b"], ["jeg", "liker", "hester"]],  { mode: 'longest', padding: ["zip","cool"] });
-  for (const zp2 of zipIt2) {
-      print(zp2);
-    }
+  // const zipIt2 = Iterator.zip([[1, 2], ["a", "b"], ["jeg", "liker", "hester"]],  { mode: 'longest', padding: ["zip","cool"] });
+  // for (const zp2 of zipIt2) {
+  //     print(zp2);
+  //   }
     
 //const zip3 = Iterator.zip([[1, 2], ["a", "b", "c"]], { mode: "strict" });
 
@@ -1394,20 +1397,15 @@ function IteratorCloseAll(iters, completion) {
   var i = iters.length - 1;
   while (i >= 0) {
     var iter = iters[i];
-
-    // Spec assumes valid Iterator Record, but we guard nulls
     if (iter !== null && IsObject(iter)) {
       try {
-        completion = IteratorClose(iter, completion);
+        IteratorClose(iter);
       } catch (e) {
-        // If IteratorClose throws, rethrow immediately per `?`
-        throw e;
+        throw e; 
       }
     }
-
     i = i - 1;
   }
-
   return completion;
 }
 
