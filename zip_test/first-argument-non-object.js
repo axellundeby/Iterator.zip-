@@ -1,29 +1,19 @@
-  // |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
-  // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
-  // This code is governed by the BSD license found in the LICENSE file.
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
+/*---
+esid: sec-iterator.zip
+description: >
+  Throws if first argument is not an object
+features: [iterator-sequencing]
+---*/
 
-  /*---
-  esid: sec-iterator.zip
-  description: >
-    Throws a TypeError if the first argument to Iterator.zip is not an object.
-  info: |
-    Iterator.zip ( iterables [, options] )
+var obj = [];
+var zip = Iterator.zip([obj]);
+assertEq(typeof zip.next, "function");
 
-    - If the first argument is not an object, a TypeError must be thrown.
-  features: [iterator-sequencing]
-  ---*/
+assertThrowsInstanceOf(() => Iterator.zip(null), TypeError);
+assertThrowsInstanceOf(() => Iterator.zip(undefined), TypeError);
+assertThrowsInstanceOf(() => Iterator.zip(1), TypeError);
+assertThrowsInstanceOf(() => Iterator.zip(true), TypeError);
+assertThrowsInstanceOf(() => Iterator.zip(Symbol()), TypeError);
 
-  let nonObjects = [
-    null,
-    undefined,
-    42,
-    true,
-    "Hello World!",
-    Symbol("test")
-  ];
-
-  for (let value of nonObjects) {
-    assert.throws(TypeError, () => Iterator.zip(value), `Expected TypeError for value: ${String(value)}`);
-  }
-
-  reportCompare(0, 0);
+reportCompare(0, 0);

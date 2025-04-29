@@ -1,27 +1,54 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
-// Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
-// This code is governed by the BSD license found in the LICENSE file.
-
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 /*---
 esid: sec-iterator.zip
 description: >
   Empty iterable as an argument produces an iterator that is immediately done.
-info: |
-  Iterator.zip ( iterables [, options] )
-
-  - In "shortest" mode (default), the resulting iterator stops as soon as any iterable is exhausted.
 features: [iterator-sequencing]
 ---*/
 
-// empty iterable as argument produces iterator which is finished
-let arg1 = [];
-let arg2 = [1, 2, 3];
+// Case 1: One of the iterables is empty
+{
+  const empty = [];
+  const nonEmpty = [1, 2, 3];
+  
+  const zip = Iterator.zip([empty, nonEmpty]);
+  const result = zip.next();
+  
+  assertEq(result.done, true);
+  assertEq(result.value, undefined);
+}
 
-let zipResult = Iterator.zip([arg1, arg2])
+// Case 2: Both iterables are empty
+{
+  const empty1 = [];
+  const empty2 = [];
+  
+  const zip = Iterator.zip([empty1, empty2]);
+  const result = zip.next();
+  
+  assertEq(result.done, true);
+  assertEq(result.value, undefined);
+}
 
-let iterResult = zipIterator.next();
+// Case 3: Single empty iterable
+{
+  const empty = [];
+  
+  const zip = Iterator.zip([empty]);
+  const result = zip.next();
+  
+  assertEq(result.done, true);
+  assertEq(result.value, undefined);
+}
 
-assert.sameValue(iterResult.done, true);
+// Case 4: No iterables at all (empty outer array)
+{
+  const zip = Iterator.zip([]);
+  const result = zip.next();
+  
+  assertEq(result.done, true);
+  assertEq(result.value, undefined);
+}
 
-reportCompare(0, 0);
-
+if (typeof reportCompare === 'function')
+  reportCompare(0, 0);

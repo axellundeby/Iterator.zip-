@@ -973,7 +973,7 @@ function IteratorFind(predicate) {
 function IteratorZip(iterables, options = {}) {
   //1. 1. If iterables is not an Object, throw a TypeError exception.
   if (typeof iterables !== 'object' || iterables === null) {
-    throw new TypeError('iterables must be an object');
+    ThrowTypeError(JSMSG_OBJECT_REQUIRED, iterables === null ? "null" : typeof iterables);
   }
 
   //2. Set options to ? GetOptionsObject(options).
@@ -1092,10 +1092,15 @@ function IteratorZip(iterables, options = {}) {
     }
   }
   function finishResults(results) {
-    return std_ArrayCreate(results);
+    var copied = [];
+    for (var i = 0; i < results.length; i++) {
+      copied[i] = results[i];
+    }
+    return copied;
   }
 
   return zipping(iters, mode, padding, finishResults);
+
 
 }
 
@@ -1293,6 +1298,8 @@ function zipping(iters, mode, padding, finishResults) {
 }
 
 
+
+
 function CreateIteratorResultObject(value, done) {
   return { value: value, done: done };
 }
@@ -1313,12 +1320,12 @@ function CreateIteratorResultObject(value, done) {
 // for (const zp1 of zipIt) {
 //     print(zp1);
 //   }
-  
-  // const zipIt2 = Iterator.zip([[1, 2], ["a", "b"], ["jeg", "liker", "hester"]],  { mode: 'longest', padding: ["zip","cool"] });
-  // for (const zp2 of zipIt2) {
-  //     print(zp2);
-  //   }
-    
+
+// const zipIt2 = Iterator.zip([[1, 2], ["a", "b"], ["jeg", "liker", "hester"]],  { mode: 'longest', padding: ["zip","cool"] });
+// for (const zp2 of zipIt2) {
+//     print(zp2);
+//   }
+
 //const zip3 = Iterator.zip([[1, 2], ["a", "b", "c"]], { mode: "strict" });
 
 function GetOptionsObject(options) {
@@ -1399,15 +1406,18 @@ function IteratorCloseAll(iters, completion) {
     var iter = iters[i];
     if (iter !== null && IsObject(iter)) {
       try {
-        IteratorClose(iter);
+        IteratorClose(iter); 
       } catch (e) {
-        throw e; 
+        throw e;
       }
     }
     i = i - 1;
   }
   return completion;
 }
+
+
+
 
 
 

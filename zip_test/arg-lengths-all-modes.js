@@ -1,64 +1,75 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
 /*---
 esid: sec-iterator.zip
 description: >
-  Ensures that Iterator.zip respects the different modes: shortest, longest, and strict.
-info: |
-  - In "shortest" mode (default), the iterator stops when the shortest iterable is exhausted.
-  - In "longest" mode, padding is used when shorter iterables are exhausted.
-  - In "strict" mode, an error is thrown if the iterables do not have the same length.
+  Tests Iterator.zip argument behavior across modes with arrays of different lengths.
 features: [iterator-sequencing]
 ---*/
 
-let longer = [1, 2, 3, 4];
-let shorter = ['a', 'b'];
+function assertDeepEq(a, b) {
+  assertEq(typeof a, typeof b, "Types should match");
+  if (Array.isArray(a) && Array.isArray(b)) {
+    assertEq(a.length, b.length, "Array lengths should match");
+    for (var i = 0; i < a.length; i++) {
+      assertDeepEq(a[i], b[i]);
+    }
+  } else {
+    assertEq(a, b, "Values should match");
+  }
+}
 
-// Default mode ("shortest")
-let iterator = Iterator.zip([longer, shorter]);
+// shortest mode (default)
+{
+  const iter = Iterator.zip([[1, 2], ['a']]); // shortest wins
+  const r1 = iter.next();
+  assertDeepEq(r1.value, [1, 'a']);
+  assertEq(r1.done, false);
 
-let result = iterator.next();
-assert.compareArray(result.value, [1, 'a'], "First zipped value should be [1, 'a']");
-assert.sameValue(result.done, false, "Iterator should not be done after first next()");
+  const r2 = iter.next();
+  assertEq(r2.value, undefined);
+  assertEq(r2.done, true);
+}
 
-result = iterator.next();
-assert.compareArray(result.value, [2, 'b'], "Second zipped value should be [2, 'b']");
-assert.sameValue(result.done, false, "Iterator should not be done after second next()");
+// longest mode
+{
+  const iter = Iterator.zip([[1], ['a', 'b']], { mode: "longest", padding: [null] });
+  const r1 = iter.next();
+  assertDeepEq(r1.value, [1, 'a']);
+  assertEq(r1.done, false);
 
-// Should stop because `shorter` is exhausted
-result = iterator.next();
-assert.sameValue(result.value, undefined, "Iterator should return undefined after exhaustion");
-assert.sameValue(result.done, true, "Iterator should be done after shortest iterable is exhausted");
+  const r2 = iter.next();
+  assertDeepEq(r2.value, [null, 'b']);
+  assertEq(r2.done, false);
 
-// "longest" mode with padding
-iterator = Iterator.zip([longer, shorter], { mode: "longest", padding: [null] });
+  const r3 = iter.next();
+  assertEq(r3.value, undefined);
+  assertEq(r3.done, true);
+}
 
-result = iterator.next();
-assert.compareArray(result.value, [1, 'a'], "First zipped value should be [1, 'a']");
-assert.sameValue(result.done, false, "Iterator should not be done after first next()");
+// strict mode — lengths must match
+{
+  assertThrowsInstanceOf(() => {
+    const iter = Iterator.zip([[1], ['a', 'b']], { mode: "strict" });
+    iter.next();
+  }, TypeError, "strict mode should throw when lengths differ");
 
-result = iterator.next();
-assert.compareArray(result.value, [2, 'b'], "Second zipped value should be [2, 'b']");
-assert.sameValue(result.done, false, "Iterator should not be done after second next()");
+  // also valid when lengths match
+  const iter = Iterator.zip([[1, 2], ['a', 'b']], { mode: "strict" });
+  const r1 = iter.next();
+  assertDeepEq(r1.value, [1, 'a']);
+  assertEq(r1.done, false);
 
-result = iterator.next();
-assert.compareArray(result.value, [3, null], "Padding should be used for longer iterable");
-assert.sameValue(result.done, false, "Iterator should continue after using padding");
+  const r2 = iter.next();
+  assertDeepEq(r2.value, [2, 'b']);
+  assertEq(r2.done, false);
 
-result = iterator.next();
-assert.compareArray(result.value, [4, null], "Padding should be used for longer iterable");
-assert.sameValue(result.done, false, "Iterator should continue after using padding");
+  const r3 = iter.next();
+  assertEq(r3.value, undefined);
+  assertEq(r3.done, true);
+}
 
-result = iterator.next();
-assert.sameValue(result.value, undefined, "Iterator should return undefined after exhaustion");
-assert.sameValue(result.done, true, "Iterator should be done after longest iterable is exhausted");
-
-// "strict" mode (should throw an error)
-assert.throws(TypeError, () => {
-  iterator = Iterator.zip([longer, shorter], { mode: "strict" });
-  iterator.next();
-}, "Strict mode should throw if iterables have different lengths");
-
-reportCompare(0, 0);
+if (typeof reportCompare === 'function')
+  reportCompare(0, 0);

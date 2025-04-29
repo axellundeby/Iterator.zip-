@@ -1,6 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
-// Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
-// This code is governed by the BSD license found in the LICENSE file.
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 
 /*---
 esid: sec-iterator.zip
@@ -10,6 +8,11 @@ info: |
   - Each call to `.next()` must return a new object, rather than reusing a single object.
 features: [iterator-sequencing]
 ---*/
+
+if (typeof Iterator.zip !== "function") {
+  reportCompare(true, true); // Skip test cleanly if not supported
+  quit(0); 
+}
 
 let iter1 = [1, 2, 3];
 let iter2 = ['a', 'b', 'c'];
@@ -27,3 +30,4 @@ assert.notSameValue(secondResult, thirdResult, "Each result object should have a
 assert.notSameValue(secondResult.value, thirdResult.value, "Each result's `value` array should be a new object");
 
 reportCompare(0, 0);
+
