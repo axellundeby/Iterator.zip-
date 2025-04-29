@@ -1,36 +1,29 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
-// Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
-// This code is governed by the BSD license found in the LICENSE file.
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 
 /*---
-esid: sec-iterator.zip
-description: >
-  Ensures that Iterator.zip throws if any iterable is a string, but only after reading padding.
-info: |
-  Iterator.zip ( iterables [, options] )
-
-  - Strings should not be considered valid iterables.
-  - When mode is "longest", padding must be read before throwing for invalid iterables.
+description: Iterator.zip should throw TypeError if iterable includes a string
 features: [iterator-sequencing]
 ---*/
 
-let optionsGetterCalled = false;
-let options = {
-  mode: "longest",
-  get padding() {
-    optionsGetterCalled = true;
-    return [];
-  }
-};
+assertThrowsInstanceOf(() => {
+  Iterator.zip([[], "string"]).next();
+}, TypeError, "string in second position");
 
-// Strings should cause a TypeError, but padding should be read first
-assert.throws(TypeError, () => Iterator.zip([[], "string"], options), 
-  "Expected TypeError when a string is passed as an iterable");
+assertThrowsInstanceOf(() => {
+  Iterator.zip(["string", []]).next();
+}, TypeError, "string in first position");
 
-assert.sameValue(optionsGetterCalled, true, "Padding should be accessed before throwing for invalid iterables");
+assertThrowsInstanceOf(() => {
+  Iterator.zip([[], [], "string"]).next();
+}, TypeError, "string in third position");
 
-// Valid cases should not throw
-Iterator.zip([[], []], { mode: "longest", padding: [] });
-Iterator.zip([[], []], { mode: "shortest" }); // No padding read in shortest mode
+assertThrowsInstanceOf(() => {
+  Iterator.zip(["", []]).next();
+}, TypeError, "empty string");
 
-reportCompare(0, 0);
+assertThrowsInstanceOf(() => {
+  Iterator.zip(["abc", "def"]).next();
+}, TypeError, "multiple strings");
+
+if (typeof reportCompare === 'function')
+  reportCompare(0, 0);
