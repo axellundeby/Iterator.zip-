@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -18,15 +18,15 @@ let arg2 = [1, 2, 3];
 let iter = Iterator.zip([arg1, arg2]);
 
 let result1 = iter.next();
-assert.sameValue(Array.isArray(result1.value), true, "First result should be an array");
+assertEq(Array.isArray(result1.value), true, "First result should be an array");
 
 let result2 = iter.next();
-assert.sameValue(Array.isArray(result2.value), true, "Second result should be an array");
+assertEq(Array.isArray(result2.value), true, "Second result should be an array");
 
 let result3 = iter.next();
-assert.sameValue(Array.isArray(result3.value), true, "Third result should be an array");
+assertEq(Array.isArray(result3.value), true, "Third result should be an array");
 
 let result4 = iter.next();
-assert.sameValue(result4.done, true, "Iterator should be finished after three results");
+assertEq(result4.done, true, "Iterator should be finished after three results");
 
 reportCompare(0, 0);

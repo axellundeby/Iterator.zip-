@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -18,8 +18,8 @@ let iter1 = Iterator.zip([[1, 2], [3, 4]], { mode: "longest" });
 let iter2 = Iterator.zip([[1, 2], [3, 4]], { mode: "shortest" });
 let iter3 = Iterator.zip([[1, 2], [3, 4]]); 
 
-assert.sameValue(iter1.mode, "longest", "Mode should be 'longest' when explicitly set.");
-assert.sameValue(iter2.mode, "shortest", "Mode should be 'shortest' when explicitly set.");
-assert.sameValue(iter3.mode, "shortest", "Mode should default to 'shortest' when not provided.");
+assertEq(iter1.mode, "longest", "Mode should be 'longest' when explicitly set.");
+assertEq(iter2.mode, "shortest", "Mode should be 'shortest' when explicitly set.");
+assertEq(iter3.mode, "shortest", "Mode should default to 'shortest' when not provided.");
 
 reportCompare(0, 0);

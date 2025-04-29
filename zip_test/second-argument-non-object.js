@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -22,7 +22,7 @@ let invalids = [
 ];
 
 for (let value of invalids) {
-  assert.throws(TypeError, () => Iterator.zip(arg1, value), `Expected TypeError for value: ${String(value)}`);
+  assertThrowsInstanceOf(TypeError, () => Iterator.zip(arg1, value), `Expected TypeError for value: ${String(value)}`);
 }
 // Valids
 Iterator.zip([arg1], undefined);

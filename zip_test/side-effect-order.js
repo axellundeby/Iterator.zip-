@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -56,7 +56,7 @@ log.push("Calling Iterator.zip");
 let iterator = Iterator.zip([iter1, iter2], options);
 
 // Assert immediately after calling .zip
-assert.compareArray(log, [
+assertDeepEq(log, [
   "Calling Iterator.zip",
   "options.mode accessed",
   "options.padding accessed",
@@ -69,7 +69,7 @@ log = [];
 iterator.next();
 
 // Assert after calling .next
-assert.compareArray(log, [
+assertDeepEq(log, [
   "iter1 next() called",
   "iter2 next() called"
 ], "Side effects should occur in the expected order after calling .next");

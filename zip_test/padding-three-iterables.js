@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -22,24 +22,24 @@ let iter4 = ['X', 'Y', 'Z'];
 let iterator = Iterator.zip([iter1, iter2, iter3, iter4], { mode: "longest", padding: ['P1', 'P2', 'P3', 'P4'] });
 
 let result = iterator.next();
-assert.compareArray(result.value, [1, 'a', true, 'X'], "First zipped value should be [1, 'a', true, 'X']");
-assert.sameValue(result.done, false, "Iterator should not be done after first next()");
+assertDeepEq(result.value, [1, 'a', true, 'X'], "First zipped value should be [1, 'a', true, 'X']");
+assertEq(result.done, false, "Iterator should not be done after first next()");
 
 result = iterator.next();
-assert.compareArray(result.value, [2, 'P2', false, 'Y'], "Second zipped value should use explicit padding");
-assert.sameValue(result.done, false, "Iterator should not be done after second next()");
+assertDeepEq(result.value, [2, 'P2', false, 'Y'], "Second zipped value should use explicit padding");
+assertEq(result.done, false, "Iterator should not be done after second next()");
 
 result = iterator.next();
-assert.compareArray(result.value, ['P1', 'P2', false, 'Z'], "Third zipped value should pad shorter iterables");
-assert.sameValue(result.done, false, "Iterator should not be done after third next()");
+assertDeepEq(result.value, ['P1', 'P2', false, 'Z'], "Third zipped value should pad shorter iterables");
+assertEq(result.done, false, "Iterator should not be done after third next()");
 
 result = iterator.next();
-assert.compareArray(result.value, ['P1', 'P2', true, 'P4'], "Fourth zipped value should continue padding");
-assert.sameValue(result.done, false, "Iterator should not be done after fourth next()");
+assertDeepEq(result.value, ['P1', 'P2', true, 'P4'], "Fourth zipped value should continue padding");
+assertEq(result.done, false, "Iterator should not be done after fourth next()");
 
 result = iterator.next();
-assert.sameValue(result.value, undefined, "Iterator should return undefined after full consumption");
-assert.sameValue(result.done, true, "Iterator should be done after all iterables are exhausted");
+assertEq(result.value, undefined, "Iterator should return undefined after full consumption");
+assertEq(result.done, true, "Iterator should be done after all iterables are exhausted");
 
 // Case 2: Some iterables have explicit padding, others default to undefined
 iter1 = [1, 2, 3];
@@ -50,20 +50,20 @@ iter4 = ['X', 'Y'];
 iterator = Iterator.zip([iter1, iter2, iter3, iter4], { mode: "longest", padding: ['PAD1', 'PAD2'] });
 
 result = iterator.next();
-assert.compareArray(result.value, [1, 'a', true, 'X'], "First zipped value should be [1, 'a', true, 'X']");
-assert.sameValue(result.done, false, "Iterator should not be done after first next()");
+assertDeepEq(result.value, [1, 'a', true, 'X'], "First zipped value should be [1, 'a', true, 'X']");
+assertEq(result.done, false, "Iterator should not be done after first next()");
 
 result = iterator.next();
-assert.compareArray(result.value, [2, 'PAD2', false, 'Y'], "Second zipped value should pad iter2 with 'PAD2'");
-assert.sameValue(result.done, false, "Iterator should not be done after second next()");
+assertDeepEq(result.value, [2, 'PAD2', false, 'Y'], "Second zipped value should pad iter2 with 'PAD2'");
+assertEq(result.done, false, "Iterator should not be done after second next()");
 
 result = iterator.next();
-assert.compareArray(result.value, [3, 'PAD2', undefined, undefined], "Third zipped value should pad iter3 and iter4 with undefined");
-assert.sameValue(result.done, false, "Iterator should not be done after third next()");
+assertDeepEq(result.value, [3, 'PAD2', undefined, undefined], "Third zipped value should pad iter3 and iter4 with undefined");
+assertEq(result.done, false, "Iterator should not be done after third next()");
 
 result = iterator.next();
-assert.sameValue(result.value, undefined, "Iterator should return undefined after full consumption");
-assert.sameValue(result.done, true, "Iterator should be done after all iterables are exhausted");
+assertEq(result.value, undefined, "Iterator should return undefined after full consumption");
+assertEq(result.done, true, "Iterator should be done after all iterables are exhausted");
 
 // Case 3: No explicit padding, should default to undefined
 iter1 = [1, 2];
@@ -74,23 +74,23 @@ iter4 = ['X', 'Y', 'Z', 'W'];
 iterator = Iterator.zip([iter1, iter2, iter3, iter4], { mode: "longest" });
 
 result = iterator.next();
-assert.compareArray(result.value, [1, 'a', true, 'X'], "First zipped value should be [1, 'a', true, 'X']");
-assert.sameValue(result.done, false, "Iterator should not be done after first next()");
+assertDeepEq(result.value, [1, 'a', true, 'X'], "First zipped value should be [1, 'a', true, 'X']");
+assertEq(result.done, false, "Iterator should not be done after first next()");
 
 result = iterator.next();
-assert.compareArray(result.value, [2, 'b', undefined, 'Y'], "Second zipped value should pad iter3 with undefined");
-assert.sameValue(result.done, false, "Iterator should not be done after second next()");
+assertDeepEq(result.value, [2, 'b', undefined, 'Y'], "Second zipped value should pad iter3 with undefined");
+assertEq(result.done, false, "Iterator should not be done after second next()");
 
 result = iterator.next();
-assert.compareArray(result.value, [undefined, 'c', undefined, 'Z'], "Third zipped value should pad iter1 and iter3 with undefined");
-assert.sameValue(result.done, false, "Iterator should not be done after third next()");
+assertDeepEq(result.value, [undefined, 'c', undefined, 'Z'], "Third zipped value should pad iter1 and iter3 with undefined");
+assertEq(result.done, false, "Iterator should not be done after third next()");
 
 result = iterator.next();
-assert.compareArray(result.value, [undefined, undefined, undefined, 'W'], "Fourth zipped value should pad iter1, iter2, iter3 with undefined");
-assert.sameValue(result.done, false, "Iterator should not be done after fourth next()");
+assertDeepEq(result.value, [undefined, undefined, undefined, 'W'], "Fourth zipped value should pad iter1, iter2, iter3 with undefined");
+assertEq(result.done, false, "Iterator should not be done after fourth next()");
 
 result = iterator.next();
-assert.sameValue(result.value, undefined, "Iterator should return undefined after full consumption");
-assert.sameValue(result.done, true, "Iterator should be done after all iterables are exhausted");
+assertEq(result.value, undefined, "Iterator should return undefined after full consumption");
+assertEq(result.done, true, "Iterator should be done after all iterables are exhausted");
 
 reportCompare(0, 0);

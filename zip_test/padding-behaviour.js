@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -46,16 +46,16 @@ let longPadding = {
 
 let iteratorShort = Iterator.zip([[1, 2, 3], ["a", "b", "c", "d"]], { mode: "longest", padding: shortPadding });
 let resultShort = iteratorShort.next();
-assert.sameValue(resultShort.done, false);
-assert.sameValue(resultShort.value.length, 2);
-assert.sameValue(log.includes("shortPadding.return"), false, "shortPadding.return should not be called");
+assertEq(resultShort.done, false);
+assertEq(resultShort.value.length, 2);
+assertEq(log.includes("shortPadding.return"), false, "shortPadding.return should not be called");
 
 log = [];
 
 let iteratorLong = Iterator.zip([[1, 2, 3], ["a", "b", "c", "d"]], { mode: "longest", padding: longPadding });
 let resultLong = iteratorLong.next();
-assert.sameValue(resultLong.done, false);
-assert.sameValue(resultLong.value.length, 2);
-assert.sameValue(log.includes("longPadding.return"), true, "longPadding.return should be called");
+assertEq(resultLong.done, false);
+assertEq(resultLong.value.length, 2);
+assertEq(log.includes("longPadding.return"), true, "longPadding.return should be called");
 
 reportCompare(0, 0);

@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -18,16 +18,16 @@ let longer = ['a', 'b', 'c', 'd'];
 let iterator = Iterator.zip([shorter, longer]);
 
 let result = iterator.next();
-assert.compareArray(result.value, [1, 'a'], "First zipped value should be [1, 'a']");
-assert.sameValue(result.done, false, "Iterator should not be done after first next()");
+assertDeepEq(result.value, [1, 'a'], "First zipped value should be [1, 'a']");
+assertEq(result.done, false, "Iterator should not be done after first next()");
 
 result = iterator.next();
-assert.compareArray(result.value, [2, 'b'], "Second zipped value should be [2, 'b']");
-assert.sameValue(result.done, false, "Iterator should not be done after second next()");
+assertDeepEq(result.value, [2, 'b'], "Second zipped value should be [2, 'b']");
+assertEq(result.done, false, "Iterator should not be done after second next()");
 
 // Should stop because `shorter` is exhausted
 result = iterator.next();
-assert.sameValue(result.value, undefined, "Iterator should return undefined after exhaustion");
-assert.sameValue(result.done, true, "Iterator should be done after shortest iterable is exhausted");
+assertEq(result.value, undefined, "Iterator should return undefined after exhaustion");
+assertEq(result.done, true, "Iterator should be done after shortest iterable is exhausted");
 
 reportCompare(0, 0);

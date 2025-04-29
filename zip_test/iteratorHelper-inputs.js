@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -17,19 +17,19 @@ let iter2 = Iterator.from(['a', 'b', 'c']).filter(x => x !== 'z'); // ['a', 'b',
 let zipped = Iterator.zip([iter1, iter2]);
 
 let result = zipped.next();
-assert.compareArray(result.value, [2, 'a']);
-assert.sameValue(result.done, false);
+assertDeepEq(result.value, [2, 'a']);
+assertEq(result.done, false);
 
 result = zipped.next();
-assert.compareArray(result.value, [4, 'b']);
-assert.sameValue(result.done, false);
+assertDeepEq(result.value, [4, 'b']);
+assertEq(result.done, false);
 
 result = zipped.next();
-assert.compareArray(result.value, [6, 'c']);
-assert.sameValue(result.done, false);
+assertDeepEq(result.value, [6, 'c']);
+assertEq(result.done, false);
 
 result = zipped.next();
-assert.sameValue(result.done, true);
-assert.sameValue(result.value, undefined);
+assertEq(result.done, true);
+assertEq(result.value, undefined);
 
 reportCompare(0, 0);

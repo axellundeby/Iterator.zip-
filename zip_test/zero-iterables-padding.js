@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zip||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -29,8 +29,8 @@ let padding = {
 let zipped = Iterator.zip([], { mode: "longest", padding });
 
 let result = zipped.next();
-assert.sameValue(result.done, true);
-assert.sameValue(result.value, undefined);
-assert.sameValue(callCount, 0, "Padding should not be read at all when no iterables are zipped");
+assertEq(result.done, true);
+assertEq(result.value, undefined);
+assertEq(callCount, 0, "Padding should not be read at all when no iterables are zipped");
 
 reportCompare(0, 0);
