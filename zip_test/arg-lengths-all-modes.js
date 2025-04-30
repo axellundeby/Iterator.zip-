@@ -9,17 +9,25 @@ description: >
 features: [iterator-sequencing]
 ---*/
 
-function assertDeepEq(a, b) {
-  assertEq(typeof a, typeof b, "Types should match");
-  if (Array.isArray(a) && Array.isArray(b)) {
-    assertEq(a.length, b.length, "Array lengths should match");
-    for (var i = 0; i < a.length; i++) {
-      assertDeepEq(a[i], b[i]);
+if (typeof assertDeepEq === 'undefined') {
+  function assertDeepEq(actual, expected, message = '') {
+    if (!isDeepEqual(actual, expected)) {
+      throw new Error(`Assertion failed: ${message}\nExpected: ${JSON.stringify(expected)}\nActual: ${JSON.stringify(actual)}`);
     }
-  } else {
-    assertEq(a, b, "Values should match");
+  }
+
+  function isDeepEqual(a, b) {
+    if (a === b) return true;
+    if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) return false;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) return false;
+      return a.every((val, i) => isDeepEqual(val, b[i]));
+    }
+    return false;
   }
 }
+
+
 
 // shortest mode (default)
 {

@@ -1,32 +1,44 @@
 // |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zip||!xulRuntime.shell)
-// Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
+// Copyright (C) 2025 Axel Martinius Lundeby. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
 /*---
 esid: sec-iterator.zip
 description: >
-  Throws a TypeError if the second argument to Iterator.zip is not an object and not null/undefined.
+  Throws a TypeError if the second argument (options) is not an object.
 info: |
   Iterator.zip ( iterables [, options] )
 
-  - If options is provided, it must be either an object or null/undefined.
-  - Any other type should result in a TypeError.
+  - If options is provided, it must be an object.
+  - Primitive values should throw a TypeError and not be coerced.
 features: [iterator-sequencing]
 ---*/
-let arg1 = [1, 2, 3]
-let invalids = [
-  42,
+
+// Step 1: Valid baseline to ensure zip itself works
+var zip = Iterator.zip([[]]);
+assertEq(typeof zip.next, "function", "zip() should return a valid iterator");
+
+// Step 2: Values that should throw TypeError as invalid options
+let invalidOptions = [
+  0,
+  1,
+  true,
   false,
-  "Hello Mozilla!",
-  Symbol("test")
+  "string",
+  Symbol("sym"),
+  () => {},
 ];
 
-for (let value of invalids) {
-  assertThrowsInstanceOf(TypeError, () => Iterator.zip(arg1, value), `Expected TypeError for value: ${String(value)}`);
+for (let value of invalidOptions) {
+  assertThrowsInstanceOf(() => Iterator.zip([[]], value), TypeError,
+    `Expected TypeError for value: ${String(value)}`);
 }
-// Valids
-Iterator.zip([arg1], undefined);
-Iterator.zip([arg1], null);
-Iterator.zip([arg1], {}); 
+
+
+// Step 3: Allowed values that must NOT throw
+Iterator.zip([[]], undefined);
+Iterator.zip([[]], null);
+Iterator.zip([[]], {});
+Iterator.zip([[]], { mode: "shortest" });
 
 reportCompare(0, 0);

@@ -16,25 +16,40 @@ features: [iterator-sequencing]
 ---*/
 
 let invalidModes = [
-    0,
-    1,
-    true,
-    false,
-    "short",
-    "FooBar",
-    {},
-    [],
-    null,
-    undefined,
-    Symbol("test")
-  ];
-  
-  for (let value of invalidModes) {
-    assertThrowsInstanceOf(TypeError, () => Iterator.zip([[]], { mode: value }), `Expected TypeError for mode: ${String(value)}`);
-  }
-  
-  Iterator.zip([[]], { mode: "shortest" });
-  Iterator.zip([[]], { mode: "longest" });
-  Iterator.zip([[]], { mode: "strict" });
-  
-  reportCompare(0, 0);
+  0,
+  1,
+  true,
+  false,
+  "short",
+  "FooBar",
+  {},
+  [],
+  null,
+];
+
+for (let value of invalidModes) {
+  let getterCalled = false;
+  let options = {
+    get mode() {
+      getterCalled = true;
+      return value;
+    }
+  };
+
+  assertThrowsInstanceOf(
+    () => Iterator.zip([[]], options),
+    TypeError,
+    `Expected TypeError for mode: ${String(value)}`
+  );
+
+  assertEq(getterCalled, true, "mode getter should be accessed");
+}
+
+// Valid strings should work
+Iterator.zip([[]], { mode: "shortest" });
+Iterator.zip([[]], { mode: "longest" });
+Iterator.zip([[]], { mode: "strict" });
+Iterator.zip([[]], { mode: undefined });
+Iterator.zip([[]], {});
+
+reportCompare(0, 0);

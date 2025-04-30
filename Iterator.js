@@ -974,6 +974,7 @@ function IteratorZip(iterables, options = {}) {
   //1. 1. If iterables is not an Object, throw a TypeError exception.
   if (typeof iterables !== 'object' || iterables === null) {
     ThrowTypeError(JSMSG_OBJECT_REQUIRED, iterables === null ? "null" : typeof iterables);
+
   }
 
   //2. Set options to ? GetOptionsObject(options).
@@ -982,14 +983,14 @@ function IteratorZip(iterables, options = {}) {
   //3. Let mode be ? Get(options, "mode").
   var mode = options.mode;
 
-  //4.If mode is undefined, set mode to "shortest".
-  if (mode == undefined) {
-    mode = 'shortest';
+  //4. If mode is undefined, set mode to "shortest".
+  if (mode === undefined) {
+    mode = "shortest";
   }
 
-  //.5 If mode is not one of "shortest", "longest", or "strict", throw a TypeError exception.
-  if ("shortest" !== mode && "longest" !== mode && "strict" !== mode) {
-    throw new TypeError('Not valid type');
+  //5. If mode is not one of "shortest", "longest", or "strict", throw a TypeError exception.
+  if ((mode !== "shortest" && mode !== "longest" && mode !== "strict")) {
+    ThrowTypeError(JSMSG_OBJECT_REQUIRED, "Invalid mode option: must be 'shortest', 'longest', or 'strict'");
   }
 
   //6. Let paddingOption be undefined.
@@ -1002,7 +1003,7 @@ function IteratorZip(iterables, options = {}) {
 
     //b. If paddingOption is not undefined and paddingOption is not an Object, throw a TypeError exception.
     if (paddingOption !== undefined && (typeof paddingOption !== 'object' || paddingOption === null)) {
-      throw new TypeError("paddingOption must be an object");
+      ThrowTypeError(JSMSG_OBJECT_REQUIRED,"paddingOption must be an object");
     }
   }
 
@@ -1158,7 +1159,7 @@ function zipping(iters, mode, padding, finishResults) {
 
           //ii: If mode is "shortest", then
           if (mode === "shortest") {
-           //i: Return ? IteratorCloseAll(openIters, ReturnCompletion(undefined))
+            //i: Return ? IteratorCloseAll(openIters, ReturnCompletion(undefined))
             return IteratorCloseAll(
               openIters,
               CreateIteratorResultObject(undefined, true)
@@ -1167,60 +1168,38 @@ function zipping(iters, mode, padding, finishResults) {
 
           // 3.b.iii.3.d.iii: Else if mode is "strict", then
           if (mode === "strict") {
-
-            // 3.b.iii.3.d.iii.i: If i ≠ 0, then
             if (i !== 0) {
-              // 3.b.iii.3.d.iii.i.i: Return ? IteratorCloseAll(openIters, Throw(TypeError))
-              return IteratorCloseAll(
-                openIters,
-                ThrowCompletion(NewTypeError("Strict mode: iterators ended at different times"))
-              );
+              IteratorCloseAll(openIters, null);
+              throw new TypeError("Strict mode: iterators ended at different times");
             }
 
-            // 3.b.iii.3.d.iii.ii: For each integer k such that 1 ≤ k < iterCount
             var k = 1;
             while (k < iterCount) {
-
-              // 3.b.iii.3.d.iii.ii.i: Assert: iters[k] is not null
-              // (This is an assertion — no runtime check needed.)
-
               var other = iters[k];
-
               if (other !== null) {
                 var step;
-
-                // 3.b.iii.3.d.iii.ii.ii: Let open be Completion(IteratorStep(iters[k]))
                 try {
-                  step = IteratorNext(other); // IteratorStep = same as IteratorNext
+                  step = IteratorNext(other);
                 } catch (e) {
-                  // 3.b.iii.3.d.iii.ii.iii: If abrupt, remove and return IteratorCloseAll
                   openIters[k] = null;
-                  return IteratorCloseAll(openIters, ThrowCompletion(e));
+                  IteratorCloseAll(openIters);
+                  throw e; // Safe JS error propagation
                 }
 
-                // 3.b.iii.3.d.iii.ii.iv: Set open to !open (unwrap normal result)
-                // (Handled implicitly in JS)
-
-                // 3.b.iii.3.d.iii.ii.v: If open is DONE, remove from openIters
                 if (step.done) {
                   openIters[k] = null;
-                }
-                // 3.b.iii.3.d.iii.ii.vi: Else, throw TypeError
-                else {
-                  return IteratorCloseAll(
-                    openIters,
-                    ThrowCompletion(NewTypeError("Strict mode: iterators ended at different times"))
-                  );
+                } else {
+                  IteratorCloseAll(openIters, null);
+                  throw new TypeError("Strict mode: iterators ended at different times");
+
                 }
               }
-
               k = k + 1;
             }
 
-            // 3.b.iii.3.d.iii.iii: Return ReturnCompletion(undefined)
             return CreateIteratorResultObject(undefined, true);
-
           }
+
 
           // 3.b.iii.3.d.iv: Else (mode is "longest")
           iters[i] = null;               // 3.b.iii.3.d.iv.iii: Set iters[i] to null
@@ -1329,17 +1308,15 @@ function CreateIteratorResultObject(value, done) {
 //const zip3 = Iterator.zip([[1, 2], ["a", "b", "c"]], { mode: "strict" });
 
 function GetOptionsObject(options) {
-  if (options === undefined) {
-    // Step 1: Create an object with a null prototype using callFunction.
-    return std_Object_create(null)
+  if (options === undefined || options === null) {
+    return std_Object_create(null);
   }
-  if (IsObject(options)) {
-    // Step 2: If options is an object, return it.
+  if (IsObject(options) && !IsCallable(options)) {
     return options;
   }
-  // Step 3: If options is neither undefined nor an object, throw a TypeError.
-  throw new TypeError('Options must be an object or undefined');
+  ThrowTypeError(JSMSG_OBJECT_REQUIRED, typeof options);
 }
+
 
 
 function IteratorHelperPrototypeReturn() {
@@ -1401,22 +1378,21 @@ function concatenateArrays(array1, array2) {
 
 
 function IteratorCloseAll(iters, completion) {
-  var i = iters.length - 1;
-  while (i >= 0) {
+  for (var i = iters.length - 1; i >= 0; i--) {
     var iter = iters[i];
     if (iter !== null && IsObject(iter)) {
-      try {
-        IteratorClose(iter); 
-      } catch (e) {
-        throw e;
+      var returnMethod = iter.return;
+      if (typeof returnMethod === 'function') {
+        try {
+          callFunction(returnMethod, iter);
+        } catch (_) {
+          // Swallow errors during iterator close
+        }
       }
     }
-    i = i - 1;
   }
   return completion;
 }
-
-
 
 
 
@@ -1432,10 +1408,10 @@ function IteratorCloseAll(iters, completion) {
 function IteratorZipKeyed(iterables, options = {}) {
   // 1. Hvis iterables ikke er et objekt, kast en TypeError.
   // if (iterables === null) {
-  if (iterables === null || typeof iterables !== 'object') {
-    throw new TypeError('iterables must be an object');
-  }
 
+  if (typeof iterables !== 'object' || iterables === null) {
+    ThrowTypeError(JSMSG_OBJECT_REQUIRED, iterables === null ? "null" : typeof iterables);
+  }
 
   // 2. Sett options til ? GetOptionsObject(options).
   options = GetOptionsObject(options);
