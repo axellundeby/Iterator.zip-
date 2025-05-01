@@ -26,7 +26,8 @@ let invalidPaddings = [
   
   // Test invalid padding values
   for (let value of invalidPaddings) {
-    assertThrowsInstanceOf(TypeError, () => Iterator.zip([[]], { mode: "longest", padding: value }), 
+    assertThrowsInstanceOf(() => Iterator.zip([[]], { mode: "longest", padding: value }), 
+      TypeError,
       `Expected TypeError for padding: ${String(value)}`);
   }
   
