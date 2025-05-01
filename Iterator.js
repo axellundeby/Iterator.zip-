@@ -998,14 +998,18 @@ function IteratorZip(iterables, options = {}) {
 
   //7. If mode is "longest", then
   if (mode === "longest") {
-    //a. Set paddingOption to ? Get(options, "padding").
     paddingOption = options.padding;
-
-    //b. If paddingOption is not undefined and paddingOption is not an Object, throw a TypeError exception.
-    if (paddingOption !== undefined && (typeof paddingOption !== 'object' || paddingOption === null)) {
-      ThrowTypeError(JSMSG_OBJECT_REQUIRED,"paddingOption must be an object");
-    }
   }
+
+  if (!IsObject(paddingOption) && paddingOption !== undefined) {
+    ThrowTypeError(JSMSG_OBJECT_REQUIRED, "paddingOption must be an object");
+  }
+  
+  if (paddingOption !== undefined &&
+      !IsCallable(paddingOption[GetBuiltinSymbol("iterator")])) {
+    ThrowTypeError(JSMSG_NOT_ITERABLE, "padding");
+  }
+  
 
   //8. Let iters be a new empty List.
   var iters = [];
@@ -1107,6 +1111,8 @@ function IteratorZip(iterables, options = {}) {
 
 
 
+
+
 function zipping(iters, mode, padding, finishResults) {
   //1. Let iterCount be the number of elements in iters.
   var iterCount = iters.length;
@@ -1169,36 +1175,34 @@ function zipping(iters, mode, padding, finishResults) {
           // 3.b.iii.3.d.iii: Else if mode is "strict", then
           if (mode === "strict") {
             if (i !== 0) {
-              IteratorCloseAll(openIters, null);
-              throw new TypeError("Strict mode: iterators ended at different times");
+              IteratorCloseAll(openIters);
+              ThrowTypeError(JSMSG_OBJECT_REQUIRED, "object");
             }
 
-            var k = 1;
-            while (k < iterCount) {
+            for (var k = 1; k < iterCount; k++) {
               var other = iters[k];
               if (other !== null) {
                 var step;
                 try {
-                  step = IteratorNext(other);
+                  step = IteratorNext(other); 
                 } catch (e) {
                   openIters[k] = null;
                   IteratorCloseAll(openIters);
-                  throw e; // Safe JS error propagation
+                  throw e;
                 }
 
                 if (step.done) {
                   openIters[k] = null;
                 } else {
-                  IteratorCloseAll(openIters, null);
-                  throw new TypeError("Strict mode: iterators ended at different times");
-
+                  IteratorCloseAll(openIters);
+                  ThrowTypeError(JSMSG_OBJECT_REQUIRED, "object");
                 }
               }
-              k = k + 1;
             }
 
             return CreateIteratorResultObject(undefined, true);
           }
+
 
 
           // 3.b.iii.3.d.iv: Else (mode is "longest")
@@ -1247,6 +1251,7 @@ function zipping(iters, mode, padding, finishResults) {
   obj["[[GeneratorState]]"] = "suspended-start";
   obj["[[UnderlyingIterators]]"] = openIters;
   obj.__proto__ = IteratorHelperPrototype;
+  obj.mode = mode;
 
   obj.next = function () {
     var state = obj["[[GeneratorState]]"];
@@ -1275,6 +1280,7 @@ function zipping(iters, mode, padding, finishResults) {
 
   return obj;
 }
+
 
 
 
@@ -1378,21 +1384,23 @@ function concatenateArrays(array1, array2) {
 
 
 function IteratorCloseAll(iters, completion) {
-  for (var i = iters.length - 1; i >= 0; i--) {
+  for (var i = 0; i < iters.length; i++) {
     var iter = iters[i];
     if (iter !== null && IsObject(iter)) {
-      var returnMethod = iter.return;
-      if (typeof returnMethod === 'function') {
-        try {
-          callFunction(returnMethod, iter);
-        } catch (_) {
-          // Swallow errors during iterator close
+      try {
+        var returnMethod = iter.return;
+        if (typeof returnMethod === 'function') {
+
+          callContentFunction(returnMethod, iter);
         }
+      } catch (e) {
+
       }
     }
   }
   return completion;
 }
+
 
 
 
@@ -1457,7 +1465,7 @@ function IteratorZipKeyed(iterables, options = {}) {
   var padding = [];
 
   //10. La allKeys være ? iterables.[[OwnPropertyKeys]]().
-  var allKeys = std_Reflect_ownKeys(iterables);
+  var allKeys = ObjectGetOwnPropertyDescriptor(iterables);
 
 
   // 11. La keys være en ny tom liste.
@@ -1468,7 +1476,6 @@ function IteratorZipKeyed(iterables, options = {}) {
     var key = allKeys[i];
 
     // a. La desc være Completion(iterables.[[GetOwnProperty]](key)).
-    //var desc = getOwnPropDescriptor(iterables, key);
     var desc = ObjectGetOwnPropertyDescriptor(iterables, key);
 
     // b. ifAbruptCloseIterators(desc, iters)
