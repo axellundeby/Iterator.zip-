@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -25,7 +25,7 @@ let opts1 = {
   }
 };
 Iterator.zipKeyed({ a: [] }, opts1);
-assert.sameValue(paddingAccessed, true, "Padding should be accessed when mode is 'longest'");
+assertEq(paddingAccessed, true, "Padding should be accessed when mode is 'longest'");
 
 // Mode "shortest" should not read padding
 paddingAccessed = false;
@@ -37,7 +37,7 @@ let opts2 = {
   }
 };
 Iterator.zipKeyed({ a: [] }, opts2);
-assert.sameValue(paddingAccessed, false, "Padding should not be accessed when mode is 'shortest'");
+assertEq(paddingAccessed, false, "Padding should not be accessed when mode is 'shortest'");
 
 // Mode "strict" should not read padding
 paddingAccessed = false;
@@ -49,6 +49,6 @@ let opts3 = {
   }
 };
 Iterator.zipKeyed({ a: [] }, opts3);
-assert.sameValue(paddingAccessed, false, "Padding should not be accessed when mode is 'strict'");
+assertEq(paddingAccessed, false, "Padding should not be accessed when mode is 'strict'");
 
 reportCompare(0, 0);

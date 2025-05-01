@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -11,7 +11,14 @@ info: |
   - The `value` property of each result must also be a unique object (not reused).
 features: [iterator-sequencing]
 ---*/
+if (typeof assertNotEq === 'undefined'){
 
+  function assertNotEq(actual, expected, message=''){
+    if (actual === expected) {
+      throw new Error(message || `Expected values to be different, but both were: ${actual}`);
+    }
+  }
+}
 let input = {
     num: [1, 2, 3],
     char: ['a', 'b', 'c']
@@ -22,13 +29,13 @@ let input = {
   let firstResult = iterator.next();
   let secondResult = iterator.next();
   
-  assert.notSameValue(firstResult, secondResult, "Each result object should be a fresh object");
-  assert.notSameValue(firstResult.value, secondResult.value, "Each value object should be distinct");
+  assertNotEq(firstResult, secondResult, "Each result object should be a fresh object");
+  assertNotEq(firstResult.value, secondResult.value, "Each value object should be distinct");
   
   let thirdResult = iterator.next();
   
-  assert.notSameValue(secondResult, thirdResult, "Each result object should be a fresh object");
-  assert.notSameValue(secondResult.value, thirdResult.value, "Each value object should be distinct");
+  assertNotEq(secondResult, thirdResult, "Each result object should be a fresh object");
+  assertNotEq(secondResult.value, thirdResult.value, "Each value object should be distinct");
   
   reportCompare(0, 0);
   

@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -13,6 +13,13 @@ info: |
   the output object should be writable and configurable.
 features: [iterator-sequencing]
 ---*/
+if (typeof assertNotEq === 'undefined'){
+  function assertNotEq(actual, expected, message=''){
+    if (actual === expected) {
+      throw new Error(message || `Expected values to be different, but both were: ${actual}`);
+    }
+  }
+}
 
 let input = {};
 // Define a non-writable, non-configurable, yet enumerable property "a"
@@ -30,7 +37,7 @@ let iter = Iterator.zipKeyed(input);
 
 // Get the first result
 let result = iter.next();
-assert.sameValue(result.done, false, "Iterator.zipKeyed should yield at least one result");
+assertEq(result.done, false, "Iterator.zipKeyed should yield at least one result");
 
 let outObj = result.value;
 
@@ -48,10 +55,10 @@ let oldValue = outObj.a;
 
 // Modify the property's value.
 outObj.a = "new value";
-assert.notSameValue(outObj.a, oldValue, "Output property 'a' is writable");
+assertNotEq(outObj.a, oldValue, "Output property 'a' is writable");
 
 // Delete the property.
 delete outObj.a;
-assert.sameValue(outObj.a, undefined, "Output property 'a' is configurable; deletion succeeded");
+assertEq(outObj.a, undefined, "Output property 'a' is configurable; deletion succeeded");
 
 reportCompare(0, 0);

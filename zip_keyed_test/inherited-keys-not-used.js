@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -20,10 +20,10 @@ let iter = Iterator.zipKeyed(obj);
 
 // The first call to next() should immediately indicate that the iterator is finished.
 let result = iter.next();
-assert.sameValue(result.done, true, "Iterator.zipKeyed should ignore inherited keys and finish immediately");
+assertEq(result.done, true, "Iterator.zipKeyed should ignore inherited keys and finish immediately");
 
 // Confirm subsequent next() calls remain finished.
 result = iter.next();
-assert.sameValue(result.done, true, "Subsequent next() calls on a finished iterator should remain finished");
+assertEq(result.done, true, "Subsequent next() calls on a finished iterator should remain finished");
 
 reportCompare(0, 0);

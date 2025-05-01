@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -20,19 +20,19 @@ let input = {
   let iterator = Iterator.zipKeyed(input);
   
   let result = iterator.next();
-  assert.sameValue(result.done, false, "Iterator should not be done after first next()");
-  assert.sameValue(result.value.shorter, 1, "First value for 'shorter' should be 1");
-  assert.sameValue(result.value.longer, 'a', "First value for 'longer' should be 'a'");
+  assertEq(result.done, false, "Iterator should not be done after first next()");
+  assertEq(result.value.shorter, 1, "First value for 'shorter' should be 1");
+  assertEq(result.value.longer, 'a', "First value for 'longer' should be 'a'");
   
   result = iterator.next();
-  assert.sameValue(result.done, false, "Iterator should not be done after second next()");
-  assert.sameValue(result.value.shorter, 2, "Second value for 'shorter' should be 2");
-  assert.sameValue(result.value.longer, 'b', "Second value for 'longer' should be 'b'");
+  assertEq(result.done, false, "Iterator should not be done after second next()");
+  assertEq(result.value.shorter, 2, "Second value for 'shorter' should be 2");
+  assertEq(result.value.longer, 'b', "Second value for 'longer' should be 'b'");
   
   // Should stop because 'shorter' is exhausted
   result = iterator.next();
-  assert.sameValue(result.value, undefined, "Iterator should return undefined after exhaustion");
-  assert.sameValue(result.done, true, "Iterator should be done after shortest iterable is exhausted");
+  assertEq(result.value, undefined, "Iterator should return undefined after exhaustion");
+  assertEq(result.done, true, "Iterator should be done after shortest iterable is exhausted");
   
   reportCompare(0, 0);
   

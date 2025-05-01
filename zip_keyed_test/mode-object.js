@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -30,9 +30,9 @@ let invalidModes = [
   ];
   
   for (let value of invalidModes) {
-    assert.throws(
-      TypeError,
+    assertThrowsInstanceOf(
       () => Iterator.zipKeyed({ a: [] }, { mode: value }),
+      TypeError,
       `Expected TypeError for mode: ${String(value)}`
     );
   }

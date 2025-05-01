@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -37,9 +37,9 @@ function createIterator(values, label) {
   
   // --- ERROR CASE: invalid input ---
   
-  assert.throws(TypeError, () => {
+  assertThrowsInstanceOf(() => {
     Iterator.zipKeyed(null);
-  }, "Invalid first argument should not trigger .return()");
+  }, TypeError, "Invalid first argument should not trigger .return()");
   
   // --- ERROR CASE: one iterator throws during next(), others should close ---
   
@@ -65,11 +65,11 @@ function createIterator(values, label) {
     }
   };
   
-  assert.throws(() => {
+  assertThrowsInstanceOf(() => {
     Iterator.zipKeyed(badIterable).next();
   }, Error, "Iterator contract broken");
   
-  assert.sameValue(badIterable._b_iter.closed, true, "Safe iterator should be closed");
+  assertEq(badIterable._b_iter.closed, true, "Safe iterator should be closed");
   
   // --- SHORTEST MODE ---
   
@@ -82,9 +82,9 @@ function createIterator(values, label) {
   zip.next();
   let final = zip.next();
   
-  assert.sameValue(final.done, true);
-  assert.sameValue(longIter.closed, true, "Long iterator should be closed when short ends");
-  assert.sameValue(shortIter.closed, false, "Short iterator should not be closed");
+  assertEq(final.done, true);
+  assertEq(longIter.closed, true, "Long iterator should be closed when short ends");
+  assertEq(shortIter.closed, false, "Short iterator should not be closed");
   
   // --- STRICT MODE ---
   
@@ -97,9 +97,9 @@ function createIterator(values, label) {
   zip.next();
   final = zip.next();
   
-  assert.sameValue(final.done, true);
-  assert.sameValue(longIter.closed, true, "Long iterator should be closed");
-  assert.sameValue(shortIter.closed, false, "Short iterator should not be closed");
+  assertEq(final.done, true);
+  assertEq(longIter.closed, true, "Long iterator should be closed");
+  assertEq(shortIter.closed, false, "Short iterator should not be closed");
   
   // --- LONGEST MODE ---
   
@@ -115,8 +115,8 @@ function createIterator(values, label) {
   zip.next();
   zip.next(); // triggers padding for `two`
   
-  assert.sameValue(iter1.closed, false, "Iterator 1 should not be closed");
-  assert.sameValue(iter2.closed, true, "Iterator 2 should be closed after natural exhaustion");
+  assertEq(iter1.closed, false, "Iterator 1 should not be closed");
+  assertEq(iter2.closed, true, "Iterator 2 should be closed after natural exhaustion");
   
   // --- .return() RECEIVER CHECK ---
   
@@ -143,8 +143,8 @@ function createIterator(values, label) {
   zip.next();
   zip.return();
   
-  assert.sameValue(returnSpy.length, 1, ".return() should have been called once");
-  assert.sameValue(typeof returnSpy[0], "object", ".return() should have been called with correct receiver");
+  assertEq(returnSpy.length, 1, ".return() should have been called once");
+  assertEq(typeof returnSpy[0], "object", ".return() should have been called with correct receiver");
   
   reportCompare(0, 0);
   

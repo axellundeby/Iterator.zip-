@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -13,6 +13,24 @@ info: |
 features: [iterator-sequencing]
 ---*/
 
+if (typeof assertDeepEq === 'undefined') {
+  function assertDeepEq(actual, expected, message = '') {
+    if (!isDeepEqual(actual, expected)) {
+      throw new Error(`Assertion failed: ${message}\nExpected: ${JSON.stringify(expected)}\nActual: ${JSON.stringify(actual)}`);
+    }
+  }
+
+  function isDeepEqual(a, b) {
+    if (a === b) return true;
+    if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) return false;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) return false;
+      return a.every((val, i) => isDeepEqual(val, b[i]));
+    }
+    return false;
+  }
+}
+
 // Case 1: Explicit padding for all keys
 let input1 = {
     one:   [1, 2],
@@ -26,40 +44,40 @@ let input1 = {
   });
   
   let r = it1.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after first next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after first next()");
+  assertDeepEq(
     Object.values(r.value),
     [1, 'a', true],
     "First zipped value should be { one:1, two:'a', three:true }"
   );
   
   r = it1.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after second next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after second next()");
+  assertDeepEq(
     Object.values(r.value),
     [2, 'Y', false],
     "Second zipped value should use explicit padding for 'two'"
   );
   
   r = it1.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after third next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after third next()");
+  assertDeepEq(
     Object.values(r.value),
     ['X', 'Z', false],
     "Third zipped value should pad 'one' and 'two' with 'X'/'Z'"
   );
   
   r = it1.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after fourth next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after fourth next()");
+  assertDeepEq(
     Object.values(r.value),
     ['X', 'Z', true],
     "Fourth zipped value should continue padding"
   );
   
   r = it1.next();
-  assert.sameValue(r.done, true,  "Iterator should be done after all items are exhausted");
-  assert.sameValue(r.value, undefined, "Final value should be undefined when done");
+  assertEq(r.done, true,  "Iterator should be done after all items are exhausted");
+  assertEq(r.value, undefined, "Final value should be undefined when done");
   
   // Case 2: Some keys have explicit padding, others default to undefined
   let input2 = {
@@ -74,32 +92,32 @@ let input1 = {
   });
   
   r = it2.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after first next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after first next()");
+  assertDeepEq(
     Object.values(r.value),
     [1, 'a', true],
     "First zipped value should be { one:1, two:'a', three:true }"
   );
   
   r = it2.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after second next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after second next()");
+  assertDeepEq(
     Object.values(r.value),
     [2, 'PAD', false],
     "Second zipped value should pad 'two' with 'PAD'"
   );
   
   r = it2.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after third next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after third next()");
+  assertDeepEq(
     Object.values(r.value),
     [3, 'PAD', undefined],
     "Third zipped value should pad 'three' with undefined"
   );
   
   r = it2.next();
-  assert.sameValue(r.done, true,  "Iterator should be done after all items are exhausted");
-  assert.sameValue(r.value, undefined, "Final value should be undefined when done");
+  assertEq(r.done, true,  "Iterator should be done after all items are exhausted");
+  assertEq(r.value, undefined, "Final value should be undefined when done");
   
   // Case 3: No explicit padding, default to undefined
   let input3 = {
@@ -111,32 +129,32 @@ let input1 = {
   let it3 = Iterator.zipKeyed(input3, { mode: "longest" });
   
   r = it3.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after first next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after first next()");
+  assertDeepEq(
     Object.values(r.value),
     [1, 'a', true],
     "First zipped value should be { one:1, two:'a', three:true }"
   );
   
   r = it3.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after second next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after second next()");
+  assertDeepEq(
     Object.values(r.value),
     [2, 'b', undefined],
     "Second zipped value should pad 'three' with undefined"
   );
   
   r = it3.next();
-  assert.sameValue(r.done, false, "Iterator should not be done after third next()");
-  assert.compareArray(
+  assertEq(r.done, false, "Iterator should not be done after third next()");
+  assertDeepEq(
     Object.values(r.value),
     [undefined, 'c', undefined],
     "Third zipped value should pad 'one' and 'three' with undefined"
   );
   
   r = it3.next();
-  assert.sameValue(r.done, true,  "Iterator should be done after all items are exhausted");
-  assert.sameValue(r.value, undefined, "Final value should be undefined when done");
+  assertEq(r.done, true,  "Iterator should be done after all items are exhausted");
+  assertEq(r.value, undefined, "Final value should be undefined when done");
   
   reportCompare(0, 0);
   

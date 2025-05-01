@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -21,10 +21,10 @@ Object.defineProperty(obj, "nonEnumKey", {
 let iter = Iterator.zipKeyed(obj);
 
 let result = iter.next();
-assert.sameValue(result.done, true, "Iterator.zipKeyed should ignore non-enumerable keys and finish immediately");
+assertEq(result.done, true, "Iterator.zipKeyed should ignore non-enumerable keys and finish immediately");
 
 // Confirm subsequent next() calls remain finished.
 result = iter.next();
-assert.sameValue(result.done, true, "Subsequent next() calls on a finished iterator should remain finished");
+assertEq(result.done, true, "Subsequent next() calls on a finished iterator should remain finished");
 
 reportCompare(0, 0);

@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -29,10 +29,11 @@ let invalidInput = {
   b: "not an iterable"
 };
 
-assert.throws(TypeError, () => Iterator.zipKeyed(invalidInput, options),
+assertThrowsInstanceOf(() => Iterator.zipKeyed(invalidInput, options),
+  TypeError,
   "Expected TypeError when a string is passed as a value");
 
-assert.sameValue(paddingAccessed, true, "Padding should be accessed before throwing for invalid values");
+assertEq(paddingAccessed, true, "Padding should be accessed before throwing for invalid values");
 
 // Valid cases should not throw
 Iterator.zipKeyed({ a: [], b: [] }, { mode: "longest", padding: { a: 0, b: 0 } });

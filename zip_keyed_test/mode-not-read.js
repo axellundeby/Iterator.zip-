@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -35,9 +35,10 @@ let invalidIterables = [
   // Ensure TypeError is thrown before mode is accessed
   for (let value of invalidIterables) {
     optionsGetterCalled = false;
-    assert.throws(TypeError, () => Iterator.zipKeyed(value, options),
+    assertThrowsInstanceOf(() => Iterator.zipKeyed(value, options),
+      TypeError,
       `Expected TypeError for first argument: ${String(value)}`);
-    assert.sameValue(
+    assertEq(
       optionsGetterCalled,
       false,
       "Mode should not be accessed if first argument is invalid"
@@ -47,7 +48,7 @@ let invalidIterables = [
   // Valid case: mode should be read
   optionsGetterCalled = false;
   Iterator.zipKeyed({ a: [] }, options);
-  assert.sameValue(optionsGetterCalled, true, "Mode should be accessed when first argument is valid");
+  assertEq(optionsGetterCalled, true, "Mode should be accessed when first argument is valid");
   
   reportCompare(0, 0);
   

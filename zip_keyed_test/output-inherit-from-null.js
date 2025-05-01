@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -16,10 +16,10 @@ let input = { a: [1] };
 let iter = Iterator.zipKeyed(input);
 
 let result = iter.next();
-assert.sameValue(result.done, false, "Iterator.zipKeyed should yield a result");
+assertEq(result.done, false, "Iterator.zipKeyed should yield a result");
 
 let outObj = result.value;
-assert.sameValue(Object.getPrototypeOf(outObj), null,
+assertEq(Object.getPrototypeOf(outObj), null,
   "Output object should have a null prototype");
 
 reportCompare(0, 0);
