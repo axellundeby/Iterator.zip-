@@ -15,11 +15,14 @@ features: [iterator-sequencing]
 ---*/
 
 let invalidPaddings = [
-  12,
   null,
-  "string",
+  0,
+  1,
   true,
-  {},
+  false,
+  "string", 
+  Symbol("test"),
+  () => {}, 
 ];
 
 

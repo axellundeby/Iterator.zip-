@@ -1004,12 +1004,12 @@ function IteratorZip(iterables, options = {}) {
   if (!IsObject(paddingOption) && paddingOption !== undefined) {
     ThrowTypeError(JSMSG_OBJECT_REQUIRED, "paddingOption must be an object");
   }
-  
+
   if (paddingOption !== undefined &&
-      !IsCallable(paddingOption[GetBuiltinSymbol("iterator")])) {
+    !IsCallable(paddingOption[GetBuiltinSymbol("iterator")])) {
     ThrowTypeError(JSMSG_NOT_ITERABLE, "padding");
   }
-  
+
 
   //8. Let iters be a new empty List.
   var iters = [];
@@ -1086,12 +1086,9 @@ function IteratorZip(iterables, options = {}) {
 
         }
       }
-      //If usingIterator is true, then
+
       if (usingIterator) {
-        //1. Let completion be Completion(IteratorClose(paddingIter, NormalCompletion(unused))).
-        IteratorClose(paddingIter);
-        var completion = NormalCompletion(undefined);
-        //2. IfAbruptCloseIterators(completion, iters).
+        var completion = IteratorClose(paddingIter);
         IfAbruptCloseIterators(completion, iters);
       }
     }
@@ -1109,141 +1106,121 @@ function IteratorZip(iterables, options = {}) {
 
 }
 
+// let iter1 = ['a'];
+// let iter2 = [true, false, false, true, false, true];
+// let iter3 = [1];
 
-
+// let iterator = Iterator.zip([iter1, iter2,iter3], { mode: "longest", padding: ['X', 'Y', 'Z'] });
+// print(JSON.stringify(iterator.next())); 
 
 
 function zipping(iters, mode, padding, finishResults) {
-  //1. Let iterCount be the number of elements in iters.
+  // 1. Let iterCount be the number of elements in iters.
   var iterCount = iters.length;
-  //2. Let openIters be a copy of iters.
-  var openIters = iters;
-  //3. Let closure be a new Abstract Closure with no parameters that captures iters, iterCount, openIters, mode, padding, and finishResults, 
+  // 2. Let openIters be a copy of iters.
+  var openIters = [];
+  for (var i = 0; i < iters.length; i++) {
+    openIters[i] = iters[i];
+  }
+
+
+  // 3. Let closure be a new Abstract Closure...
   function closure() {
     // 3.a. If iterCount = 0, return ReturnCompletion(undefined).
     if (iterCount === 0) {
       return CreateIteratorResultObject(undefined, true);
     }
 
-    // 3.b. Repeat:
     var results = [];
 
-    // 3.b.ii. Assert: openIters is not empty.
-
-    // 3.b.iii: For each integer i such that 0 ≤ i < iterCount, in ascending order, do
-    var i = 0;
-    while (i < iterCount) {
-
-      // 3.b.iii.1: Let iter be iters[i].
+    // 3.b.iii. For each i from 0 to iterCount
+    for (var i = 0; i < iterCount; i++) {
       var iter = iters[i];
 
-      // 3.b.iii.2: If iter is null, then
+      // 3.b.iii.2. If iter is null
       if (iter === null) {
-        // 3.b.iii.2.a: Assert: mode is "longest"
-        // (This is a spec assertion — no runtime check needed.)
-
-        // 3.b.iii.2.b: Let result be padding[i]
         results[i] = padding[i];
-      } else {
-        // 3.b.iii.3.a: Let result be Completion(IteratorStepValue(iter))
-        var result;
-        try {
-          result = IteratorNext(iter); // This is IteratorStepValue
-        } catch (e) {
-          // 3.b.iii.3.b.i: Remove iter from openIters
-          openIters[i] = null;
+        continue;
+      }
 
-          // 3.b.iii.3.b.ii: Return ? IteratorCloseAll(openIters, result)
-          return IteratorCloseAll(openIters, ThrowCompletion(e));
+      // 3.b.iii.3. Try getting next value
+      var result;
+      try {
+        result = IteratorNext(iter); // same as Completion(IteratorStepValue(iter))
+      } catch (e) {
+        openIters[i] = null;
+        IteratorCloseAll(openIters);
+        throw e;
+      }
+
+      // 3.b.iii.3.d. If result.done
+      if (result.done) {
+        openIters[i] = null;
+
+        if (mode === "shortest") {
+          return IteratorCloseAll(openIters, CreateIteratorResultObject(undefined, true));
         }
 
-        //d. If result is done, then
-        if (result.done) {
-
-          //i: Remove iter from openIters.
-          openIters[i] = null;
-
-          //ii: If mode is "shortest", then
-          if (mode === "shortest") {
-            //i: Return ? IteratorCloseAll(openIters, ReturnCompletion(undefined))
-            return IteratorCloseAll(
-              openIters,
-              CreateIteratorResultObject(undefined, true)
-            );
+        if (mode === "strict") {
+          if (i !== 0) {
+            IteratorCloseAll(openIters);
+            ThrowTypeError(JSMSG_OBJECT_REQUIRED, "object");
           }
 
-          // 3.b.iii.3.d.iii: Else if mode is "strict", then
-          if (mode === "strict") {
-            if (i !== 0) {
-              IteratorCloseAll(openIters);
-              ThrowTypeError(JSMSG_OBJECT_REQUIRED, "object");
-            }
+          for (var k = 1; k < iterCount; k++) {
+            var other = iters[k];
+            if (other !== null) {
+              var step;
+              try {
+                step = IteratorNext(other);
+              } catch (e) {
+                openIters[k] = null;
+                IteratorCloseAll(openIters);
+                throw e;
+              }
 
-            for (var k = 1; k < iterCount; k++) {
-              var other = iters[k];
-              if (other !== null) {
-                var step;
-                try {
-                  step = IteratorNext(other); 
-                } catch (e) {
-                  openIters[k] = null;
-                  IteratorCloseAll(openIters);
-                  throw e;
-                }
-
-                if (step.done) {
-                  openIters[k] = null;
-                } else {
-                  IteratorCloseAll(openIters);
-                  ThrowTypeError(JSMSG_OBJECT_REQUIRED, "object");
-                }
+              if (step.done) {
+                openIters[k] = null;
+              } else {
+                return IteratorCloseAll(openIters, ThrowTypeError(JSMSG_OBJECT_REQUIRED, "object"));
               }
             }
-
-            return CreateIteratorResultObject(undefined, true);
           }
 
+          return CreateIteratorResultObject(undefined, true);
+        }
 
+        else if (mode === "longest") {
+          iters[i] = null;
+          results[i] = padding[i];
 
-          // 3.b.iii.3.d.iv: Else (mode is "longest")
-          iters[i] = null;               // 3.b.iii.3.d.iv.iii: Set iters[i] to null
-          results[i] = padding[i];       // 3.b.iii.3.d.iv.iv: Set result to padding[i]
-
-          // 3.b.iii.3.d.iv.ii: If openIters is empty, return ReturnCompletion(undefined)
+          // Check if all are closed
           var allClosed = true;
-          var j = 0;
-          while (j < iterCount) {
+          for (var j = 0; j < iterCount; j++) {
             if (openIters[j] !== null) {
               allClosed = false;
               break;
             }
-            j = j + 1;
           }
           if (allClosed) {
             return CreateIteratorResultObject(undefined, true);
           }
 
-        } else {
-          // 3.b.iii.4: Append result to results
-          results[i] = result.value;
+          continue;
         }
       }
-      // End of 3.b.iii loop
-      i = i + 1;
+      // 3.b.iii.4: result is valid
+      results[i] = result.value;
     }
-    // 3.b.iv: Set results = finishResults(results)
+
+    // 3.b.iv: Finish results
     var zipped = finishResults(results);
 
-    // 3.b.v: Let completion be Completion(Yield(results))
-    // (Handled by returning a result object here)
+    // 3.b.v: Return zipped
     return CreateIteratorResultObject(zipped, false);
-
-    // 3.b.vi: If completion is an abrupt completion, then
-    //This is handled in the .next() wrapper outside the closure.
   }
 
-
-
+  // Return generator object
   var obj = {};
   var IteratorHelperPrototype = {};
 
@@ -1280,6 +1257,7 @@ function zipping(iters, mode, padding, finishResults) {
 
   return obj;
 }
+
 
 
 
@@ -1384,22 +1362,20 @@ function concatenateArrays(array1, array2) {
 
 
 function IteratorCloseAll(iters, completion) {
-  for (var i = 0; i < iters.length; i++) {
+  for (var i = iters.length - 1; i >= 0; i--) {
     var iter = iters[i];
     if (iter !== null && IsObject(iter)) {
       try {
-        var returnMethod = iter.return;
-        if (typeof returnMethod === 'function') {
-
-          callContentFunction(returnMethod, iter);
-        }
+        var result = IteratorClose(iter); // only one argument allowed
+        // you may want to merge `result` with `completion` manually if needed
       } catch (e) {
-
+        completion = ThrowCompletion(e);
       }
     }
   }
   return completion;
 }
+
 
 
 

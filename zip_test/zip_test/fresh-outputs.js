@@ -9,9 +9,10 @@ info: |
 features: [iterator-sequencing]
 ---*/
 
-if (typeof Iterator.zip !== "function") {
-  reportCompare(true, true); // Skip test cleanly if not supported
-  quit(0); 
+function assertNotEq(actual, expected, message=''){
+  if (actual === expected) {
+    throw new Error(message || `Expected values to be different, but both were: ${actual}`);
+  }
 }
 
 let iter1 = [1, 2, 3];
@@ -22,12 +23,11 @@ let iterator = Iterator.zip([iter1, iter2]);
 let firstResult = iterator.next();
 let secondResult = iterator.next();
 
-assert.notSameValue(firstResult, secondResult, "Each result object should have a unique identity");
-assert.notSameValue(firstResult.value, secondResult.value, "Each result's `value` array should be a new object");
+assertNotEq(firstResult, secondResult, "Each result object should have a unique identity");
+assertNotEq(firstResult.value, secondResult.value, "Each result's `value` array should be a new object");
 
 let thirdResult = iterator.next();
-assert.notSameValue(secondResult, thirdResult, "Each result object should have a unique identity");
-assert.notSameValue(secondResult.value, thirdResult.value, "Each result's `value` array should be a new object");
+assertNotEq(secondResult, thirdResult, "Each result object should have a unique identity");
+assertNotEq(secondResult.value, thirdResult.value, "Each result's `value` array should be a new object");
 
 reportCompare(0, 0);
-
