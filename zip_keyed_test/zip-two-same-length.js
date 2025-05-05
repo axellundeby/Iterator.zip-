@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -22,23 +22,23 @@ let input = {
   let iterator = Iterator.zipKeyed(input);
   
   let result = iterator.next();
-  assert.sameValue(result.done, false, "Iterator should not be done after first next()");
-  assert.sameValue(result.value.nums, 1, "First value for 'nums' should be 1");
-  assert.sameValue(result.value.chars, 'T', "First value for 'chars' should be 'T'");
+  assertEq(result.done, false, "Iterator should not be done after first next()");
+  assertEq(result.value.nums, 1, "First value for 'nums' should be 1");
+  assertEq(result.value.chars, 'T', "First value for 'chars' should be 'T'");
   
   result = iterator.next();
-  assert.sameValue(result.done, false, "Iterator should not be done after second next()");
-  assert.sameValue(result.value.nums, 2, "Second value for 'nums' should be 2");
-  assert.sameValue(result.value.chars, 'N', "Second value for 'chars' should be 'N'");
+  assertEq(result.done, false, "Iterator should not be done after second next()");
+  assertEq(result.value.nums, 2, "Second value for 'nums' should be 2");
+  assertEq(result.value.chars, 'N', "Second value for 'chars' should be 'N'");
   
   result = iterator.next();
-  assert.sameValue(result.done, false, "Iterator should not be done after third next()");
-  assert.sameValue(result.value.nums, 3, "Third value for 'nums' should be 3");
-  assert.sameValue(result.value.chars, 'M', "Third value for 'chars' should be 'M'");
+  assertEq(result.done, false, "Iterator should not be done after third next()");
+  assertEq(result.value.nums, 3, "Third value for 'nums' should be 3");
+  assertEq(result.value.chars, 'M', "Third value for 'chars' should be 'M'");
   
   result = iterator.next();
-  assert.sameValue(result.value, undefined, "Iterator should return undefined after exhaustion");
-  assert.sameValue(result.done, true, "Iterator should be done after all elements are consumed");
+  assertEq(result.value, undefined, "Iterator should return undefined after exhaustion");
+  assertEq(result.done, true, "Iterator should be done after all elements are consumed");
   
   reportCompare(0, 0);
   

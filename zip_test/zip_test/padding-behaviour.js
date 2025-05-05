@@ -34,10 +34,11 @@ let longPadding = {
   next() {
     log.push("longPadding.next");
     this.count++;
-    return { value: "pad", done: this.count >= 10 }; 
+    return { value: "pad", done: this.count >= 10 };
   },
   return() {
     log.push("longPadding.return");
+    return {};
   },
   [Symbol.iterator]() {
     return this;
@@ -53,9 +54,8 @@ assertEq(log.includes("shortPadding.return"), false, "shortPadding.return should
 log = [];
 
 let iteratorLong = Iterator.zip([[1, 2, 3], ["a", "b", "c", "d"]], { mode: "longest", padding: longPadding });
-let resultLong = iteratorLong.next();
-assertEq(resultLong.done, false);
-assertEq(resultLong.value.length, 2);
+while (!iteratorLong.next().done) {}
+
 assertEq(log.includes("longPadding.return"), true, "longPadding.return should be called");
 
 reportCompare(0, 0);

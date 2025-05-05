@@ -1,4 +1,4 @@
-// |reftest| shell-option(--enable-iterator-sequencing) skip-if(!Iterator.zipKeyed||!xulRuntime.shell) -- iterator-sequencing is not enabled unconditionally, requires shell-options
+// |reftest| shell-option(--enable-joint-iteration) skip-if(!Iterator.zipKeyed||!xulRuntime.shell)
 // Copyright (C) 2025 Theodor Nissen-Meyer. All rights reserved.
 // This code is governed by the BSD license found in the LICENSE file.
 
@@ -15,6 +15,6 @@ features: [iterator-sequencing]
 let proto = Object.getPrototypeOf(Iterator.from([]).take(0));
 let zipped = Iterator.zipKeyed({ a: [], b: [] });
 
-assert.sameValue(Object.getPrototypeOf(zipped), proto, "Iterator.zipKeyed result should have %IteratorHelperPrototype% as prototype");
+assertEq(Object.getPrototypeOf(zipped), proto, "Iterator.zipKeyed result should have %IteratorHelperPrototype% as prototype");
 
 reportCompare(0, 0);

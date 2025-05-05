@@ -31,4 +31,3 @@ assertNotEq(secondResult, thirdResult, "Each result object should have a unique 
 assertNotEq(secondResult.value, thirdResult.value, "Each result's `value` array should be a new object");
 
 reportCompare(0, 0);
-
