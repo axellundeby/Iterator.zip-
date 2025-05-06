@@ -61,8 +61,12 @@ for (let i = 0; i < expected.length; i++) {
 assertEq(iter.next().done, true);
 
 // --- Strict mode should throw ---
-assertThrowsInstanceOf(TypeError, () => {
-  Iterator.zip([A, B, C, D], { mode: "strict" }).next();
-});
+
+assertThrowsInstanceOf(
+  () => Iterator.zip([['a1'], [], ['c1']], { mode: "strict" }).next(),
+  TypeError,
+  "Strict mode: iterators ended at different times"
+);
+
 
 reportCompare(0, 0);

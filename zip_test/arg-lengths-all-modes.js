@@ -31,7 +31,7 @@ if (typeof assertDeepEq === 'undefined') {
 
 // shortest mode (default)
 {
-  const iter = Iterator.zip([[1, 2], ['a']]); // shortest wins
+  const iter = Iterator.zip([[1, 2], ['a']]); 
   const r1 = iter.next();
   assertDeepEq(r1.value, [1, 'a']);
   assertEq(r1.done, false);
@@ -61,6 +61,7 @@ if (typeof assertDeepEq === 'undefined') {
 {
   assertThrowsInstanceOf(() => {
     const iter = Iterator.zip([[1], ['a', 'b']], { mode: "strict" });
+    iter.next();
     iter.next();
   }, TypeError, "strict mode should throw when lengths differ");
 

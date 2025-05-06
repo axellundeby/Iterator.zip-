@@ -13,6 +13,24 @@ info: |
 features: [iterator-sequencing]
 ---*/
 
+if (typeof assertDeepEq === 'undefined') {
+  function assertDeepEq(actual, expected, message = '') {
+    if (!isDeepEqual(actual, expected)) {
+      throw new Error(`Assertion failed: ${message}\nExpected: ${JSON.stringify(expected)}\nActual: ${JSON.stringify(actual)}`);
+    }
+  }
+
+  function isDeepEqual(a, b) {
+    if (a === b) return true;
+    if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) return false;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) return false;
+      return a.every((val, i) => isDeepEqual(val, b[i]));
+    }
+    return false;
+  }
+}
+
 // Case 1: Explicit padding for all iterables
 let iter1 = [1, 2];
 let iter2 = ['a'];
@@ -29,11 +47,11 @@ assertDeepEq(result.value, [2, 'Y', false], "Second zipped value should use expl
 assertEq(result.done, false, "Iterator should not be done after second next()");
 
 result = iterator.next();
-assertDeepEq(result.value, ['X', 'Z', false], "Third zipped value should pad shorter iterables");
+assertDeepEq(result.value, ['X', 'Y', false], "Third zipped value should pad shorter iterables");
 assertEq(result.done, false, "Iterator should not be done after third next()");
 
 result = iterator.next();
-assertDeepEq(result.value, ['X', 'Z', true], "Fourth zipped value should continue padding");
+assertDeepEq(result.value, ['X', 'Y', true], "Fourth zipped value should continue padding");
 assertEq(result.done, false, "Iterator should not be done after fourth next()");
 
 result = iterator.next();
@@ -45,7 +63,7 @@ iter1 = [1, 2, 3];
 iter2 = ['a'];
 iter3 = [true, false];
 
-iterator = Iterator.zip([iter1, iter2, iter3], { mode: "longest", padding: ['PAD'] });
+iterator = Iterator.zip([iter1, iter2, iter3], { mode: "longest", padding: [undefined,'PAD'] });
 
 result = iterator.next();
 assertDeepEq(result.value, [1, 'a', true], "First zipped value should be [1, 'a', true]");

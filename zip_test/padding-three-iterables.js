@@ -13,6 +13,25 @@ info: |
 features: [iterator-sequencing]
 ---*/
 
+if (typeof assertDeepEq === 'undefined') {
+  function assertDeepEq(actual, expected, message = '') {
+    if (!isDeepEqual(actual, expected)) {
+      throw new Error(`Assertion failed: ${message}\nExpected: ${JSON.stringify(expected)}\nActual: ${JSON.stringify(actual)}`);
+    }
+  }
+
+  function isDeepEqual(a, b) {
+    if (a === b) return true;
+    if (typeof a !== 'object' || a === null || typeof b !== 'object' || b === null) return false;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      if (a.length !== b.length) return false;
+      return a.every((val, i) => isDeepEqual(val, b[i]));
+    }
+    return false;
+  }
+}
+
+
 // Case 1: Explicit padding for all iterables
 let iter1 = [1, 2];
 let iter2 = ['a'];
