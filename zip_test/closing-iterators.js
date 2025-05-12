@@ -51,9 +51,9 @@ let badIterable = {
 };
 
 let safeIterator = createIterator([1, 2, 3], "safe");
-// assertThrowsInstanceOf(() => Iterator.zip([badIterable, safeIterator]).next(), Error);
+assertThrowsInstanceOf(() => Iterator.zip([badIterable, safeIterator]).next(), Error);
 assertEq(safeIterator.closed, true, "Safe iterator should be closed");
-  
+
 // --- SHORTEST / STRICT MODE ---
 
 let shortIter = createIterator([1, 2], "short");
@@ -63,62 +63,59 @@ let iterator = Iterator.zip([shortIter, longIter], { mode: "shortest" });
 
 iterator.next(); // [1, 10]
 iterator.next(); // [2, 20]
-let finalResult = iterator.next(); // Should close `longIter`
+let finalResult = iterator.next();
 
 assertEq(finalResult.done, true, "Iterator should be done after shortest exhausted");
 assertEq(longIter.closed, true, "Long iterator should be closed");
 assertEq(shortIter.closed, false, "Short iterator should NOT be closed");
 
-// --- STRICT MODE ---
 
-// shortIter = createIterator([1, 2], "short");
-// longIter = createIterator([10, 20, 30, 40], "long");
+shortIter = createIterator([1, 2], "short");
+longIter = createIterator([10, 20, 30, 40], "long");
 
-// iterator = Iterator.zip([shortIter, longIter], { mode: "strict" });
+iterator = Iterator.zip([shortIter, longIter], { mode: "strict" });
 
-// iterator.next();
-// iterator.next();
-// finalResult = iterator.next();
+iterator.next();
+iterator.next();
+finalResult = iterator.next();
 
-// assertEq(finalResult.done, true, "Iterator should be done after shortest exhausted");
-// assertEq(longIter.closed, true, "Long iterator should be closed");
+assertEq(finalResult.done, true, "Iterator should be done after shortest exhausted");
+assertEq(longIter.closed, true, "Long iterator should be closed");
 
-// --- LONGEST MODE ---
 
-// let longestIter1 = createIterator([1, 2, 3], "longest1");
-// let longestIter2 = createIterator([10, 20], "longest2");
+let longestIter1 = createIterator([1, 2, 3], "longest1");
+let longestIter2 = createIterator([10, 20], "longest2");
 
-// iterator = Iterator.zip([longestIter1, longestIter2], { mode: "longest", padding: [null, undefined] });
+iterator = Iterator.zip([longestIter1, longestIter2], { mode: "longest", padding: [null, undefined] });
 
-// iterator.next(); // [1, 10]
-// iterator.next(); // [2, 20]
-// iterator.next(); // [3, undefined]
+iterator.next(); // [1, 10]
+iterator.next(); // [2, 20]
+iterator.next(); // [3, undefined]
 
-// assertEq(longestIter1.closed, false, "Iterator 1 should NOT be closed (exhausted naturally)");
-// assertEq(longestIter2.closed, true, "Iterator 2 should be closed since it exhausted first");
+assertEq(longestIter1.closed, false, "Iterator 1 should NOT be closed (exhausted naturally)");
+assertEq(longestIter2.closed, true, "Iterator 2 should be closed since it exhausted first");
 
-// --- CORRECT RECEIVER FOR .return() ---
 
-// let returnSpy = [];
-// let trackedIterator = {
-//     next() { return { value: 42, done: false }; },
-//     return() {
-//         returnSpy.push(this);
-//         return { done: true };
-//     }
-// };
-// let trackedIterable = {
-//     [Symbol.iterator]() {
-//         return trackedIterator;
-//     }
-// };
+let returnSpy = [];
+let trackedIterator = {
+    next() { return { value: 42, done: false }; },
+    return() {
+        returnSpy.push(this);
+        return { done: true };
+    }
+};
+let trackedIterable = {
+    [Symbol.iterator]() {
+        return trackedIterator;
+    }
+};
 
-// iterator = Iterator.zip([trackedIterable, shortIter]);
-// iterator.next();
-// iterator.return();
+iterator = Iterator.zip([trackedIterable, shortIter]);
+iterator.next();
+iterator.return();
 
-// assertEq(returnSpy.length, 1, ".return() should have been called once");
-// assertEq(returnSpy[0], trackedIterator, ".return() should be called on the correct iterator");
+assertEq(returnSpy.length, 1, ".return() should have been called once");
+assertEq(returnSpy[0], trackedIterator, ".return() should be called on the correct iterator");
 
 
 reportCompare(0, 0);

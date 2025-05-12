@@ -15,26 +15,28 @@ features: [iterator-sequencing]
 ---*/
 
 let invalidPaddings = [
-    0,
-    1,
-    true,
-    false,
-    "string",  // Strings should not be allowed as padding
-    Symbol("test"),
-    () => {},  // Functions should not be allowed as padding
-  ];
-  
-  // Test invalid padding values
-  for (let value of invalidPaddings) {
-    assertThrowsInstanceOf(() => Iterator.zip([[]], { mode: "longest", padding: value }), 
-      TypeError,
-      `Expected TypeError for padding: ${String(value)}`);
-  }
-  
-  // Valid cases should not throw
-  Iterator.zip([[]], { mode: "longest", padding: undefined });
-  Iterator.zip([[]], { mode: "longest", padding: {} }); // Empty object is valid
-  Iterator.zip([[]], { mode: "longest", padding: [] }); // Arrays are valid objects
-  
-  reportCompare(0, 0);
-  
+  null,
+  0,
+  1,
+  true,
+  false,
+  "string", 
+  Symbol("test"),
+  () => {}, 
+];
+
+
+
+for (let value of invalidPaddings) {
+  assertThrowsInstanceOf(
+    () => Iterator.zip([[]], { mode: "longest", padding: value }),
+    TypeError,
+    `Expected TypeError for padding: ${String(value)}`
+  );
+}
+
+
+Iterator.zip([[]], { mode: "longest", padding: undefined });
+Iterator.zip([[]], { mode: "longest", padding: [] });
+
+reportCompare(0, 0);
